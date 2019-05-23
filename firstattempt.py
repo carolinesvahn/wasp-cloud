@@ -9,6 +9,8 @@ import pyspark
 from pyspark.ml.linalg import Vectors
 from pyspark.sql import SparkSession
 from pyspark.ml.linalg import Matrices
+import scipy as sc
+
 spark = SparkSession.builder.getOrCreate()
 
 df = spark.sql('''select 'spark' as hello ''')
@@ -20,3 +22,6 @@ print(v.norm(2))
 
 dm1 = Matrices.dense(2, 3, [1, 2, 3, 4, 5, 6])
 dm2 = Matrices.dense(2, 3, [7, 8, 9, 10, 11, 12])
+
+#Read one of the matrices
+mat = scipy.io.mmread('494_bus.mtx')
