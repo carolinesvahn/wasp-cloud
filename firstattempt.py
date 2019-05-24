@@ -5,23 +5,22 @@ Spyder Editor
 This is a temporary script file.
 """
 
-import pyspark
-from pyspark.ml.linalg import Vectors
-from pyspark.sql import SparkSession
-from pyspark.ml.linalg import Matrices
-import scipy as sc
 
-spark = SparkSession.builder.getOrCreate()
+from spark import do_spark
+from flask import Flask
+app = Flask(__name__)
 
-df = spark.sql('''select 'spark' as hello ''')
-df.show()
 
-#Trying something with linalg
-v = Vectors.dense(2.0, 0.0, 3.0, 4.0, 5.0)
-print(v.norm(2))
+@app.route("/")
+def home():
+    return "Hello, World!"
+@app.route("/spark")
+def spark():
+    return do_spark()
+ 
+if __name__ == "__main__":
+    app.run(debug=True)
 
-dm1 = Matrices.dense(2, 3, [1, 2, 3, 4, 5, 6])
-dm2 = Matrices.dense(2, 3, [7, 8, 9, 10, 11, 12])
 
 #Read one of the matrices
-mat = scipy.io.mmread('494_bus.mtx')
+#mat = scipy.io.mmread('494_bus.mtx')
