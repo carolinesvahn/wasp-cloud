@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri May 24 11:29:23 2019
 
-@author: tmgkn
-"""
+
+import time
+import sys
+import csv
 from pyspark.sql import SparkSession
 from pyspark.ml.linalg import Vectors
 from pyspark.ml.linalg import Matrices
 from pyspark.mllib.linalg import QRDecomposition
 from pyspark.mllib.linalg.distributed import IndexedRowMatrix
 from pyspark.mllib.linalg.distributed import DistributedMatrix
+#from scipy.io import loadmat
+#from scipy.sparse import issparse
+import numpy as np
 
 
 #Define Spark and SQL context
@@ -18,6 +21,12 @@ sc = SparkContext("local", "First App") #This runs in the "local" cluster
 from pyspark.sql import SQLContext
 from pyspark import sql
 sqlContext = sql.SQLContext(sc)
+
+#JOHNS STUFF
+from pyspark import SparkContext
+from pyspark.mllib.linalg import Vectors
+from pyspark.mllib.linalg.distributed import RowMatrix
+
 
 #Set up loggin file with all the performance info we need
 #1) You need to create /conf directory under $SPARK_HOME
@@ -30,7 +39,7 @@ sqlContext = sql.SQLContext(sc)
 #message_prefix = '<' + app_name + ' ' + app_id + '>'
 #logger = log4j.LogManager.getLogger(message_prefix)
 
-sc.setLogLevel("INFO")
+#sc.setLogLevel("INFO")
 
 
 #import scipy as sc
@@ -93,19 +102,50 @@ def indexed_matrix_from_numpy(M):
     return idxM
 
 
+#def gen_vectors(mat):
+#    for row in mat:
+#        if issparse(row):
+#            row = row.tocsc()
+#            d = {ind: val for ind, val in zip(row.indices, row.data)}
+#            yield Vectors.sparse(row.shape[1], d)
+#        else:
+#            yield Vectors.dense(row.toarray())
+
+
+
 #Testing the functions defined above
-mat = IndexedRowMatrix(sc.parallelize([(0, (0, 1)), (1, (2, 3)), (2,(4,5))]))
-do_spark_Gramian(mat)
-do_spark_SVD(mat,2,"false")
-do_spark_cosine_sim(mat)
+#mat = IndexedRowMatrix(sc.parallelize([(0, (0, 1)), (1, (2, 3)), (2,(4,5))]))
+#do_spark_Gramian(mat)
+#do_spark_SVD(mat,2,"false")
+#do_spark_cosine_sim(mat)
 
 
 #Bigger matrices
-n = 1000
-s1 = np.random.normal(0, 1, n*n)
-M = np.reshape(s1,(n,n))
-mat = indexed_matrix_from_numpy(M)
-do_spark_Gramian(mat)
-do_spark_SVD(mat,n,"false")
-do_spark_cosine_sim(mat)
+#n = 1000
+#s1 = np.random.normal(0, 1, n*n)
+#M = np.reshape(s1,(n,n))
+#mat = indexed_matrix_from_numpy(M)
+#do_spark_Gramian(mat)
+#do_spark_SVD(mat,n,"false")
+#do_spark_cosine_sim(mat)
+    
 
+
+
+#Testing with matlabb-like matrices and input arguments
+def main(filename):
+    print(filename)
+    
+    M = np.loadtxt(open(filename, "rb"), delimiter=",", skiprows=0)
+    mat = indexed_matrix_from_numpy(M)
+    
+    t = time.time()
+    
+    mat.computeSVD(mat.numCols())
+    
+    sc.stop()
+    print(time.time() - t)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])
