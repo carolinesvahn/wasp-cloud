@@ -141,7 +141,8 @@ def main(filename):
     
     t = time.time()
     
-    mat.computeSVD(mat.numCols())
+    #mat.computeSVD(mat.numCols())
+    do_spark_cosine_sim(mat)
     
     sc.stop()
     print(time.time() - t)
